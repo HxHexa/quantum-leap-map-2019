@@ -1,0 +1,350 @@
+<!--
+Main Google Map sourcecode using Maps JavaScript API
+Most of the code was derived from the example on Google's documentation
+and Prof. Ursula Wolz's code for the 2018's map.
+
+Included in this version is adding the ability to show multiple authors
+on the same location, as well as fixing the bug of infoboxes not closing
+when another one is opened.
+
+2019 QuangTran/Hexa
+-->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <!--/*Header. All of this was lifted from Google's example*-->
+    <title>Quantum Leap Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+
+    //markerInfo = [[hovertext, lat, lng, dest, author, link]]
+    //array that stores the information of each markers on the map
+    //add another element to the array will add a new marker on the map
+    var markerInfo = [ [
+        "England", 52.80, -1.76, "Stonehenge, England",
+       ["Ameer", "Ashton", "Dominic", "Pratap"], ["https://drive.google.com/open?id=1KlHd64KqnmLSDrpqsMD4dt8uH3aG6CjP", "https://drive.google.com/open?id=1ikAcuTaHlyjo6OfI81fG2H0DUmJRkn2C", "https://drive.google.com/open?id=16qhivzkpb7tpIYEjmbBP7EofGNUXqYLj", "https://drive.google.com/open?id=1P47NFi_55OVpJB6NpdG2TxGQdMPhrUGm"]
+    ], [
+        "United States", 39.32, -110.69, "Utah, US",
+       ["Ameer"], ["https://drive.google.com/open?id=11XJEZohqnE5ebuVosz7bOva2P5y_3nuK"]
+    ], [
+        "Greece", 37.97, 23.72, "Athens, Greece",
+       ["Ameer"], ["https://drive.google.com/open?id=1rxKOFqQBbfzZKVg_ANhbKWTqHFb82-sF"]
+    ], [
+        "China", 34.363829, 108.904623, "Silk Road",
+       ["Ameer", "Jayden"], ["https://drive.google.com/open?id=1qZ0j87Sr5rMz3XcFy5DNU78kdbTuVV9w", "https://docs.google.com/document/d/1r_gBrthKS8xrULls3IQqINQyqZ-J-IORM2VqaAQFwCs/edit?usp=sharing"]
+    ], [
+        "Peru", -13.162911, -72.544952, "Machu Picchu, Peru",
+       ["Skyler", "Quang", "Sizo"], ["https://drive.google.com/open?id=1JLAWPFAdKKIbVM88sS0Z-N0FTUWBDLsQ", "https://drive.google.com/open?id=1X8WrVIi9GFvpLK9GS8kyOGseacUcVEV_", "https://drive.google.com/open?id=1RVfVeE2xAnzgFStkOm-5a3kHwr39liu9"]
+    ], [
+        "Phillipines", 14.596326, 120.984195, "Phillipines",
+       ["Skyler"], ["https://drive.google.com/open?id=1zBc1PbXyspG2sAWYsEbZTVV07a6Fx6rR"]
+    ], [
+        "Chile", -27.109145, -109.351871, "Easter Island, Chile",
+       ["Skyler"], ["https://drive.google.com/open?id=15O29i8uEKt7MSm-sxy5utrreCx6ZRD73"]
+    ], [
+        "England", 51.521167, -0.115378, "Wimbledon, London, England",
+       ["Calvin"], ["https://drive.google.com/open?id=1SJKn8F5SxYVmdWsIOaDUSaAVGnUO4sBP"]
+    ], [
+        "United States", 34.050161, -118.264534,"Los Angeles",
+       ["Calvin"], ["https://drive.google.com/open?id=1ze8frlnZlCkUGhMREA0kQqS1TRJ7Gz5E"]
+    ], [
+        "United States", 40.708259, -73.978261,"New York, United States",
+       ["Calvin"], ["https://drive.google.com/open?id=1KikM-ht6XLzuvHRNWbgCt9pA97U0sB7-"]
+    ], [
+        "Thailand", 15.758276, 101.067212,"Thailand",
+       ["Calvin", "Sizo"], ["https://drive.google.com/open?id=1h7ShIG906qjyUDs7e4238S2T-jao23J7", "https://drive.google.com/open?id=1zKR7yerfLTpZs0Su6uUMu9MdF8BZf8kr"]
+    ], [
+        "Pacific Ocean", 31.304195, -158.538521,"Titanic",
+       ["Ethan"], ["https://drive.google.com/open?id=145eUtsQKO9lHGER9dicuqTf0TZPFw0U4"]
+    ], [
+        "Japan", 35.560851, 138.526681,"Mt. Fuji, Japan",
+       ["Ethan"], ["https://drive.google.com/open?id=13H9GYOusgRYEzOtmByG5OjtPgdCRrkJe"]
+    ], [
+        "Japan", 35.411464, 138.993454, "Suicide Forest, Japan",
+       ["Ethan"], ["https://drive.google.com/open?id=1izvH6Cd9DQlz7iqNeYBRR7m3HwJ6t_SR"]
+    ], [
+        "Nepal", 27.990089, 86.925147, "Mt. Everest, Nepal",
+       ["Ethan"], ["https://drive.google.com/open?id=1k-pvUdv2Q_PZ1N5AQkwSsesZ8IAvyVR0"]
+    ], [
+        "Spain", 41.380564, 2.167771, "Barcelona, Spain",
+       ["Ethan"], ["https://drive.google.com/open?id=1ckJdy7NaIRTshVHBAd5R-2CGs-geSEqt"]
+    ], [
+        "Iraq", 33.058201, 43.182094,"Iraq",
+       ["Ethan"], ["https://drive.google.com/open?id=1i-BnZ-tOi7VQdShlVLljPwoIZO3Izyxk"]
+    ], [
+        "Italia", 41.890322, 12.492274, "Colosseum, Rome, Italia",
+       ["Kameron"], ["https://drive.google.com/open?id=1kSYW-_CIkBCQLFzWl3ced-THfpJBTEd7"]
+    ], [
+        "Kenya", 0.241774, 37.574450,"Kenya",
+       ["Kameron"], ["https://drive.google.com/open?id=1Ll7QK9gkKRWHSVrqlXGJPI9rhZibqhVF"]
+    ], [
+        "Bulgaria", 42.048839, 25.630098,"Magura Cave, Bulgaria",
+       ["Kameron"], ["https://drive.google.com/open?id=1EQEehq4kbzf9UkFvP7Sdp4PIMADp_j6j"]
+    ], [
+        "Japan", 31.584209, 130.650000,"Mt. Sakurajima, Japan",
+       ["Kameron"], ["https://drive.google.com/open?id=16Wx5Q2718-PMS85vWpAsjAmj0nYQbQU9"]
+    ], [
+        "Japan", 39.463331, 140.477327,"Daisenryo Kofun, Japan",
+       ["Kameron"], ["https://drive.google.com/open?id=1p-qDpf4gbzJlirs5M6D-exxYv5_Kz4ow"]
+    ], [
+        "Poland", 49.983587, 20.053904, "Wieliczka Salt Mine, Southern Poland",
+       ["Kameron"], ["https://drive.google.com/open?id=19Gr5q86wDhW70dM2Efglmq_HCuLxZ7e8"]
+    ], [
+        "Ireland", 52.338077, -9.769931, "Nelson's Pillar, Sackville, Ireland",
+       ["Kameron"], ["https://drive.google.com/open?id=1LRLRO7wAmfJ8nREQtaMtreXHhSmfG6HR"]
+    ], [
+        "Canada", 41.989311, -82.659338, "Peele, Canada",
+       ["Kameron"], ["https://drive.google.com/open?id=1bbxPAuR8KhGlmWPi6sjDY-DmqrTEsMVC"]
+    ], [
+        "Egypt", 30.018821, 31.209217, "The Great Pyramids, Egypt",
+       ["Jayden", "Dominic"], ["https://drive.google.com/open?id=1jXaKd27G44a3kYKP45sCWj4V4su_HmxV", "https://drive.google.com/open?id=1quaQ9N7HRfA8GS0YAWEohCv5LWBFuN2H"]
+    ]
+, [
+        "South Sudan", 10.103959, 30.090325, "Yida Refugee Camp, South Sudan",
+       ["Jayden"], ["https://drive.google.com/open?id=1M3EJnQ8rmx7UXZm7blNix4pj2rkvZ3Tm"]
+    ]
+, [
+        "Syria", 34.551762, 38.268046, "The Tetrapylon, Syria",
+       ["Jayden"], ["https://drive.google.com/open?id=1LIhCjbH40xTGmjAAxcDWdcjYaW2t-zyy"]
+    ]
+, [
+        "Japan", 24.466238, 123.010096, "Yonaguni Monument, Japan",
+       ["Jayden"], ["https://drive.google.com/open?id=1u-PI1QTJD7CUbqmwU2NA-Q2--ALxF6mQ"]
+    ]
+, [
+        "Sudan", 3.575893, 32.074263, "Nimule, Sudan",
+       ["Jayden"], ["https://drive.google.com/open?id=18YZCEMYlFkrDo0UjTil_Pof4sC8sEYyo"]
+    ]
+, [
+        "The Bahamas", 24.171169, -78.013867, "The Bahamas",
+       ["Theo"], ["https://drive.google.com/open?id=15aK-v0xvsfDjPgVsy4CsMArJG86QSzDQ"]
+    ]
+, [
+        "Cuba", 21.937041, -84.400645, "Underwater Pyramids, Cuba",
+       ["Theo"], ["https://drive.google.com/open?id=1Ci-WbZ4ukPyCrHuYYWUnjCkfAL5F_JEh"]
+    ]
+, [
+        "Italy", 40.747127, 14.501236, "Pompeii, Italy",
+       ["Theo"], ["https://drive.google.com/open?id=1lO7K-A8186zpX51-KW26kTgRh1FE4cOC"]
+    ]
+, [
+        "United States", 40.946597, -81.513447, "The Pawpaw Fruits",
+       ["Jeffery"], ["https://drive.google.com/open?id=1A9uHqGX5bC1pd_A742yHhYyXP70p2ega"]
+    ]
+, [
+        "South Africa", -32.671888, 21.414426, "Cape Town, South Africa",
+       ["Michael", "Pratap"], ["https://drive.google.com/open?id=1-HeuBMxDPLH1CWRWX9P77Nd_HWwo_1b6", "https://drive.google.com/open?id=1DrmkJXB80wYTj2JU-29HZ4GEsVCjqyxh"]
+    ]
+, [
+        "Ethiopia", 8.493388, 39.078077, "Ethiopia",
+       ["Michael"], ["https://drive.google.com/open?id=1KNYuh9vxwBU3M2Z8tx9YOBS8zlj1MbeV"]
+    ]
+, [
+        "France", 48.858504, 2.294481, "Paris, France",
+       ["Michael", "Ethan", "Pratap"], ["https://drive.google.com/open?id=1GGnbr_Keia0Iv3VZQFiVNVCPXfBBpoSH", "https://drive.google.com/open?id=1LhmUUNLuufC2G9kPW08BDWmKgG7V_9bX", "https://drive.google.com/open?id=1bbj4y94ZKD9tsUOAvGvC8-yZL1JYK7H-"]
+    ]
+, [
+        "Canada", 44.053562, -79.457764, "Newmarket, Canada",
+       ["Michael"], ["https://drive.google.com/open?id=1sVeLmUnCsMpCeIncEXMZq_3i5C-dw-qc"]
+    ],  [
+        "Australia", -21.976403, 140.509841, "Queensland, Australia",
+       ["Ashton"], ["https://drive.google.com/open?id=1KlHd64KqnmLSDrpqsMD4dt8uH3aG6CjPhttps://drive.google.com/open?id=1r_WrKqXfVxgJQiB9Bv7Vd5L2OMO-c36d"]
+    ], [
+        "United States", 44.447828, -110.597911, "Yellowstone, US",
+       ["Ashton"], ["https://drive.google.com/open?id=1sUWpBhiqfBMGgglvog3EBy0kBXL1rMNm"]
+    ], [
+        "Peru", -13.837182, -76.251833, "Paracas, Peru",
+       ["Ashton"], ["https://drive.google.com/open?id=1J-zTGurq7uYNH4Vh651G-o-l-HuAKf2r"]
+    ], [
+        "Jordan", .328501, 35.444330, "Petra, Jordan",
+       ["Ashton"], ["https://drive.google.com/open?id=1nY6ASQlWml3tpHFq3v0zUmFcZY7JkuaE"]
+    ], [
+        "Rwanda", -2.341455, 30.958578
+, "Rwanda, Africa",
+       ["Dominic"], ["https://drive.google.com/open?id=1b02O89czaCNew2umm8STvW_3WGs_Hv7m"]
+    ], [
+        "Egypt", 6.940372, 29.779169, "Egypt, Africa",
+       ["Dominic"], ["https://drive.google.com/open?id=160nD99SudLK1B7DzEInt_9zao444f1Te"]
+    ], [
+        "Australia", -42.352024, 146.618342
+, "Tasmania, Australia",
+       ["Dominic"], ["https://drive.google.com/open?id=1cYcfe6tF0H51msGxqFrnUtnA365epjcd"]
+    ], [
+        "Germany", 52.53, 13.34, "Germany",
+       ["Michaela"], ["https://drive.google.com/open?id=1kHtSlNIzC5dZswpDhrnZqcVl1qpu2tGk"]
+    ], [
+        "Poland", 49.983511, 20.053807, "Poland",
+       ["Michaela"], ["https://drive.google.com/open?id=1g1ad35PDyuRr9ZPCZAIxrfP-dlMvAb4R"]
+    ], [
+        "Mexico", 19.273223, -99.088135, "Xochimilco Canals, Mexico",
+       ["Michaela"], ["https://drive.google.com/open?id=1HIfPsyPKT5Y4aM2Fp4H1ujZ4IV97Frwx"]
+    ], [
+        " Tanzania", -7.298034, 34.954377, "Tanzania",
+       ["Michaela"], ["https://drive.google.com/open?id=1c3_MfKeQTXQL9oWtheKaTQQcE-gn_6N5"]
+    ], [
+        "Ireland", 53.309673, -7.728340
+, "Ireland",
+       ["Michaela"], ["https://drive.google.com/open?id=1FnGhmlpNBr91jJlPAf1lACEZ7f7SDRnR"]
+    ], [
+        "France", -16.507545, -151.757798, "Bora Bora, France",
+       ["Dragon"], ["https://drive.google.com/open?id=1dpOF45FsbIWUhw79uJ5F521SpDDII_NQ"]
+    ], [
+        " Hawaii", 21.306518, -157.986903, "Hawaii",
+       ["Dragon", "Sizo"], ["https://drive.google.com/open?id=1IxyhipnJgSAQtszSxARmxSFob7F2SKyo", "https://drive.google.com/open?id=1WiQpoNaGLsJchpLzbuYvC-c0U-IEpmim"]
+    ], [
+        "Japan", 35.479027, 139.883305, "Japan",
+       ["Dragon"], ["https://drive.google.com/open?id=1VgS8_FjhVQ-D7qpm9BYJr_LtKp_7owHO"]
+    ], [
+        "United States", 29.185839, -81.043808, "Florida",
+       ["Dragon"], ["https://drive.google.com/open?id=1HyTxnEMVSN8lDQZrXUOJDuuF4xjEimhH"]
+    ], [
+        "Black Sea", 43.492700, 34.292897, "Black Sea",
+       ["Dragon"], ["https://drive.google.com/open?id=18b_IbQcsSJXkLNKfATnxrBAxE-IXFTd7"]
+    ], [
+        "Trinidad and Tobago", 10.445008, -61.462047, "Trinidad and Tobago",
+       ["Dragon"], ["https://drive.google.com/open?id=1aK3mSuXv9LuD-3aU36NVEh4y-6VX_FY3"]
+    ], [
+        "China", 39.917117, 116.409727, "Beijing, China",
+       ["Quang"], ["https://drive.google.com/open?id=1I_TosWaGq7t7ziZDOmuHX26krDOkbSmN"]
+    ], [
+        "Malaysia", 3.167786, 101.660669, "Barracuda Point, Malaysia",
+       ["Quang"], ["https://drive.google.com/open?id=1SxMI3-HARxDwtsNhA_-1OUN9bK09DnrE"]
+    ], [
+        "Australia", 35.302681, 149.134287, "Great Barrier Reef, Australia",
+       ["Quang"], ["https://drive.google.com/open?id=1MVWr1A7cfZ4p9tWGIMNj2S_yFJdW68ZM"]
+    ], [
+        "Canada", 45.409199, -75.705979, "Niagara Falls, Canada",
+       ["Quang"], ["https://drive.google.com/open?id=1HikGs5tuxVeOA0PdIBuPVScCQRY8iNwp"]
+    ], [
+        "Czech Republic", 50.066948, 14.425992, "Sedley Ossuary",
+       ["Quang"], ["https://drive.google.com/open?id=1EgHNF9rW1MItR48EenbRsMX5vvPNyDMu"]
+    ], [
+        "Egypt", 23.987787, 32.874971, "River Nile",
+       ["Sizo"], ["https://drive.google.com/open?id=1xb8qNapxhBHnuIzsEbz1PRzxKIGNyhNk"]
+    ], [
+        "South Africa", -33.951368, 18.460338, "University of Cape Town, South Africa",
+       ["Sizo"], ["https://drive.google.com/open?id=1G243_tucMLZdkJ9g1WLTKeyNUWxzmxWk"]
+    ], [
+        "Spain", 43.384576, -4.116659, "Cave of Altamira, Spain",
+       ["Sizo"], ["https://drive.google.com/open?id=1UtpGyDQE8Jr6Y7WstzGjWzWgrltMsJkl"]
+    ], [
+        "Yemen", 15.373985, 44.200936, "Yemen",
+       ["Sizo"], ["https://drive.google.com/open?id=1ly4i6D2kJSr8CP5Ob066tnM5klZmAZ9V"]
+    ], [
+        "China", 15.914554, 114.492253, "South China Sea",
+       ["Pratap"], ["https://drive.google.com/open?id=1BT0QfLtedCoD7cWEUFmi7ckNApsPIR64"]
+    ], [
+        "India", 28.615108, 77.214834, "Delhi, India",
+       ["Pratap"], ["https://drive.google.com/open?id=1iRHB6FmkxGlJPOVy-0R3JzqSaZrV3aq9"]
+    ], [
+        "Russia", 53.556219, 108.105843, "Lake Baikal, Russia",
+       ["Pratap"], ["https://drive.google.com/open?id=1L4ILuHRaR82G4HECiEEHCxiOaJ1-sxL5"]
+    ], [
+        "Myanmar", 19.765441, 96.009559, "Pindaya Caves",
+       ["Pratap"], ["https://drive.google.com/open?id=1g9o8Tj5znwho8qOc3v86JOfL4S9GmJ8G"]
+    ], [
+        "Israel", 31.766039, 35.212593, "Jerusalem",
+       ["Pratap"], ["https://drive.google.com/open?id=149ezsmHHFMDOSvpG12nXYsGzQWYIPojU"]
+    ]
+]
+
+
+
+        var map;
+        //making the infowindow global helps with the infowindows clutter bug
+        var infoWindow = null;
+
+        var lat;
+        var lng;
+        var title;
+
+        var dest;
+        var author;
+        var link;
+
+        //initialize map, taken from Prof. Ursula's
+        function initMap() {
+            makeMap();
+
+            //iterate through the marker array to draw them out
+            for (i = 0; i < markerInfo.length; i++) {
+                drawMarker(i);
+            }
+        }
+
+        function makeMap() {
+            //makng the map, taken from Google's
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: 0, lng: 0},
+                zoom: 2
+            });
+
+google.maps.event.addListener(map, 'click', function() {
+                if (infoWindow) {
+                    infoWindow.close();
+                 }
+             })
+
+        }
+
+        //drawing the markers on the screen
+        //most of this was also taken from Prof. Ursula's, though changes were made to accomodate the array
+        function drawMarker(i) {
+            var marker = new google.maps.Marker({
+                map: map,
+                title: markerInfo[i][0],
+                position: {lat: markerInfo[i][1], lng: markerInfo[i][2]}
+            })
+
+            infoWindow = new google.maps.InfoWindow();
+            //add an event listener to detect clicks on markers
+            google.maps.event.addListener(marker, 'click', function() {
+                infoWindow.setContent(buildContent(i));
+                infoWindow.open(map, marker);
+            })
+        }
+
+        //building the content of the infobox using HTML code
+        function buildContent(i) {
+            var content = 'Location';
+
+            dest = markerInfo[i][3];
+            author = markerInfo[i][4];
+            link = markerInfo[i][5];
+
+            content += '<div class=\"info_content\">'
+
+            content += '<h3>' + dest + '</h3>';
+            for (j = 0; j < author.length; j++) {
+                content += '<p><a href=\"' + link[j] + '\">' + author[j] + '</a></p>';
+            }
+
+            content += '</div>'
+
+            return content;
+        }
+
+    </script>
+    <!--API Key for Map init-->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAx4vgowg-5KiU3Cr2wSD2PNSvNahntCl8&callback=initMap"
+    async defer></script>
+  </body>
+</html>
